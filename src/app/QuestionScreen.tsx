@@ -1,38 +1,61 @@
 import { StyleSheet, Text, View, Pressable, Button } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import QuestionCard from "../components/QuestionCard";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import questions from "../questions";
 import CustomButton from "../components/CustomButton";
 import Card from "../components/Card";
+import { useQuizContext } from "../provider/QuesstionProvider";
+import { useTimer } from "../hooks/useTimer";
+import LottieView from "lottie-react-native";
+import party from "../../assets/party.json";
 
 const QuestionScreen = () => {
-  const [questionIndex, setQuestionIndex] = useState<number>(0);
-  const question = questions[questionIndex];
+  const { timer, startTimer, clearTimer } = useTimer(20);
+  const { question, questionIndex, onNext, score, totalQuestions, bestScore } =
+    useQuizContext();
 
-  const onNext = () => {
-    setQuestionIndex((prevQuestion) => prevQuestion + 1);
-  };
+  useEffect(() => {
+    startTimer();
+    return () => clearTimer();
+  }, [question]);
+
+  useEffect(() => {
+    if (timer <= 0 && questionIndex < totalQuestions) {
+      onNext();
+    }
+  }, [timer]);
 
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeView}>
         <View style={styles.container}>
           <View>
-            <Text style={styles.title}>Question {questionIndex + 1}/5</Text>
+            <Text style={styles.title}>
+              Question {questionIndex + 1}/{totalQuestions}
+            </Text>
           </View>
           {question ? (
             <View>
               <QuestionCard question={question} />
-              <Text style={styles.timer}>20 sec</Text>
+              <Text style={styles.timer}>{timer} sec</Text>
             </View>
           ) : (
-            <Card title="Well done">
-              <Text>Correct answers: 3/5</Text>
-              <Text>Score: 20</Text>
-              <Button title="Back" onPress={() => setQuestionIndex(0)} />
-            </Card>
+            <>
+              <LottieView
+                style={StyleSheet.absoluteFill}
+                autoPlay
+                loop={false}
+                source={party}
+              />
+              <Card title="Well done">
+                <Text>
+                  Correct answers: {score}/{totalQuestions}
+                </Text>
+                <Text>Best Score: {bestScore}</Text>
+                {/* <Button title="Back" onPress={() => setQuestionIndex(0)} /> */}
+              </Card>
+            </>
           )}
           <CustomButton
             title="Next"

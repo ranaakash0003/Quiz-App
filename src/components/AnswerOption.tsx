@@ -1,17 +1,19 @@
 import { StyleSheet, Text, Pressable } from "react-native";
 import React from "react";
+import { useQuizContext } from "../provider/QuesstionProvider";
 
 type AnswerOptionProps = {
   option: string;
-  onOptionPressed: (option: string) => void;
-  isSelected?: boolean;
 };
 
-const AnswerOption = ({
-  option,
-  onOptionPressed,
-  isSelected,
-}: AnswerOptionProps) => {
+const AnswerOption = ({ option }: AnswerOptionProps) => {
+  const { selectedOption, setSelectedOption } = useQuizContext();
+  const isSelected = selectedOption === option;
+
+  const onOptionPressed = (option: string) => {
+    setSelectedOption(option);
+  };
+
   return (
     <Pressable
       style={[styles.container, isSelected && styles.selectedOption]}
